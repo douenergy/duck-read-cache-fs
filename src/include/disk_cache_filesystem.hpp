@@ -1,4 +1,7 @@
 // A filesystem wrapper, which performs on-disk cache for read operations.
+//
+// TODO(hjiang): Handle concurrent access, which is possible for
+// `FILE_FLAGS_PARALLEL_ACCESS`.
 
 #pragma once
 
@@ -190,8 +193,10 @@ public:
 private:
   // Read from [handle] for an block-size aligned chunk into [start_addr]; cache
   // to local filesystem and return to user.
-  void ReadAndCache(FileHandle &handle, char *start_addr, uint64_t start_offset,
-                    uint64_t bytes_to_read, uint64_t block_size);
+  void ReadAndCache(FileHandle &handle, char *buffer,
+                    uint64_t requested_start_offset,
+                    uint64_t requested_bytes_to_read, uint64_t file_size,
+                    uint64_t block_size);
 
   // Read from [location] on [nr_bytes] for the given [handle] into [buffer].
   // Return the actual number of bytes to read.
