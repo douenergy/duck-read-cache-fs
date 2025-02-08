@@ -101,7 +101,7 @@ void CacheLocal(const CacheReadChunk &chunk, FileSystem &local_filesystem,
   // available disk space reservation is an order of magnitude bigger than cache
   // chunk size.
   auto disk_space =
-      local_filesystem.GetAvailableDiskSpace(ON_DISK_CACHE_DIRECTORY);
+      local_filesystem.GetAvailableDiskSpace(cache_directory);
   if (!disk_space.IsValid() ||
       disk_space.GetIndex() < MIN_DISK_SPACE_FOR_CACHE) {
     EvictStaleCacheFiles(local_filesystem, cache_directory);

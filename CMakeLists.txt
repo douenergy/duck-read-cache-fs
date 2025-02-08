@@ -61,6 +61,9 @@ target_link_libraries(test_shared_lru_cache ${EXTENSION_NAME})
 add_executable(test_size_literals unit/test_size_literals.cpp)
 target_link_libraries(test_size_literals ${EXTENSION_NAME})
 
+add_executable(test_set_extension_config unit/test_set_extension_config.cpp)
+target_link_libraries(test_set_extension_config ${EXTENSION_NAME})
+
 # Benchmark
 add_executable(read_s3_object benchmark/read_s3_object.cpp)
 target_link_libraries(read_s3_object ${EXTENSION_NAME})

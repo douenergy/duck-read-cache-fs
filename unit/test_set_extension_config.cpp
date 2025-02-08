@@ -1,0 +1,67 @@
+// Unit test for setting extension config.
+
+#define CATCH_CONFIG_RUNNER
+#include "catch.hpp"
+
+#include "disk_cache_filesystem.hpp"
+#include "filesystem_utils.hpp"
+#include "duckdb/common/local_file_system.hpp"
+#include "duckdb/common/string_util.hpp"
+#include "duckdb/common/types/uuid.hpp"
+#include "duckdb/main/database.hpp"
+#include "duckdb/main/connection.hpp"
+#include "cache_filesystem_config.hpp"
+
+
+using namespace duckdb; // NOLINT
+
+namespace {
+const std::string TEST_ON_DISK_CACHE_DIRECTORY = "/tmp/duckdb_test_cached_http_cache";
+const std::string TEST_SECOND_ON_DISK_CACHE_DIRECTORY = "/tmp/duckdb_test_cached_http_cache_second";
+} // namespace
+
+// One chunk is involved, requested bytes include only "first and last chunk".
+TEST_CASE("Test on changing extension config"
+          "change defaul cache dir path setting",
+          "[extension config test]") {
+
+    DuckDB db(nullptr);
+    auto &instance = db.instance;
+    auto &fs = instance->GetFileSystem();
+    fs.RegisterSubSystem(make_uniq<DiskCacheFileSystem>(LocalFileSystem::CreateLocal(), OnDiskCacheConfig{}));
+
+
+	Connection con(db);
+    con.Query("SET fs_cache_disk_dir='/tmp/duckdb_test_cached_http_cache' ");
+    con.Query("CREATE TABLE integers AS SELECT i, i+1 as j FROM range(10) r(i)");
+
+    // make sure the cache directory is empty before the query
+    int files = GetFileCountUnder(TEST_ON_DISK_CACHE_DIRECTORY);
+    REQUIRE(files == 0);
+
+    // con.Query("SELECT * FROM integers");
+    con.Query("SELECT * FROM 's3://r2duck2/t10000.parquet'");
+
+    int files_after_query = GetFileCountUnder(TEST_ON_DISK_CACHE_DIRECTORY);
+    vector<string> files_in_cache = GetSortedFilesUnder(TEST_ON_DISK_CACHE_DIRECTORY);
+    REQUIRE(files_after_query == 1);
+   
+    con.Query("SET fs_cache_disk_dir='/tmp/duckdb_test_cached_http_cache_second' ");
+    con.Query("SELECT * FROM 's3://r2duck2/t10000.parquet'");
+
+
+    int files_after_query_second = GetFileCountUnder(TEST_SECOND_ON_DISK_CACHE_DIRECTORY);
+    vector<string> files_in_cache_second = GetSortedFilesUnder(TEST_SECOND_ON_DISK_CACHE_DIRECTORY);
+    REQUIRE(files_after_query_second == 1);
+    REQUIRE(files_in_cache == files_in_cache_second);
+
+    auto local_filesystem = LocalFileSystem::CreateLocal();
+    local_filesystem->RemoveDirectory(TEST_ON_DISK_CACHE_DIRECTORY);
+    local_filesystem->RemoveDirectory(TEST_SECOND_ON_DISK_CACHE_DIRECTORY);
+};
+
+
+int main(int argc, char **argv) {
+  int result = Catch::Session().run(argc, argv);
+  return result;
+}
