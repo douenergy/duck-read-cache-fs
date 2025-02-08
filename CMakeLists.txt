@@ -20,6 +20,7 @@ set(EXTENSION_SOURCES
     src/disk_cache_filesystem.cpp
     src/in_memory_cache_filesystem.cpp
     src/utils/filesystem_utils.cpp
+    src/utils/thread_utils.cpp
     duckdb-httpfs/extension/httpfs/create_secret_functions.cpp
     duckdb-httpfs/extension/httpfs/crypto.cpp
     duckdb-httpfs/extension/httpfs/hffs.cpp

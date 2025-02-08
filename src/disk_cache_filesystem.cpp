@@ -5,10 +5,10 @@
 #include "duckdb/common/types/uuid.hpp"
 #include "utils/include/resize_uninitialized.hpp"
 #include "utils/include/filesystem_utils.hpp"
+#include "utils/include/thread_utils.hpp"
 
 #include <cstdint>
 #include <utility>
-#include <pthread.h>
 #include <utime.h>
 
 namespace duckdb {
@@ -221,7 +221,7 @@ void DiskCacheFileSystem::ReadAndCache(FileHandle &handle, char *buffer,
     io_threads.emplace_back([this, &handle, block_size,
                              cache_read_chunk =
                                  std::move(cache_read_chunk)]() mutable {
-      pthread_setname_np(pthread_self(), "RdCachRdThd");
+      SetThreadName("RdCachRdThd");
 
       // Check local cache first, see if we could do a cached read.
       const auto local_cache_file = GetLocalCacheFile(
