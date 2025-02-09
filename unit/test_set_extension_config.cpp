@@ -37,7 +37,7 @@ TEST_CASE("Test on changing extension config"
       LocalFileSystem::CreateLocal(), OnDiskCacheConfig{}));
 
   Connection con(db);
-  con.Query("SET cached_http_cache='/tmp/duckdb_test_cached_http_cache' ");
+  con.Query("SET cached_http_cache='" + TEST_ON_DISK_CACHE_DIRECTORY + "'");
   con.Query("CREATE TABLE integers AS SELECT i, i+1 as j FROM range(10) r(i)");
   con.Query("COPY integers TO" + TEST_ON_DISK_CACHE_FILE);
 
@@ -52,8 +52,8 @@ TEST_CASE("Test on changing extension config"
       GetSortedFilesUnder(TEST_ON_DISK_CACHE_DIRECTORY);
   REQUIRE(files_after_query == 1);
 
-  con.Query(
-      "SET cached_http_cache='/tmp/duckdb_test_cached_http_cache_second' ");
+  con.Query("SET cached_http_cache='" + TEST_SECOND_ON_DISK_CACHE_DIRECTORY +
+            "'");
   con.Query("SELECT * FROM" + TEST_ON_DISK_CACHE_FILE);
 
   int files_after_query_second =
