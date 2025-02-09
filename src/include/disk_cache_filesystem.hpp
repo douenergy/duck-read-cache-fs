@@ -17,7 +17,7 @@ public:
                             OnDiskCacheConfig{}) {}
   DiskCacheFileSystem(unique_ptr<FileSystem> internal_filesystem_p,
                       OnDiskCacheConfig cache_directory_p);
-  std::string GetName() const override { return "disk_cache_filesystem"; }
+  std::string GetName() const override;
 
 protected:
   // Read from [handle] for an block-size aligned chunk into [start_addr]; cache

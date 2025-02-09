@@ -141,6 +141,11 @@ DiskCacheFileSystem::DiskCacheFileSystem(
   local_filesystem->CreateDirectory(cache_config.on_disk_cache_directory);
 }
 
+std::string DiskCacheFileSystem::GetName() const {
+  return StringUtil::Format("disk_cache_filesystem for %s",
+                            internal_filesystem->GetName());
+}
+
 void DiskCacheFileSystem::ReadAndCache(FileHandle &handle, char *buffer,
                                        idx_t requested_start_offset,
                                        idx_t requested_bytes_to_read,
