@@ -5,6 +5,7 @@
 #include "duckdb/common/file_system.hpp"
 #include "duckdb/common/local_file_system.hpp"
 #include "duckdb/common/unique_ptr.hpp"
+#include "duckdb/common/file_opener.hpp"
 #include "cache_filesystem_config.hpp"
 #include "base_cache_filesystem.hpp"
 
@@ -18,6 +19,10 @@ public:
   DiskCacheFileSystem(unique_ptr<FileSystem> internal_filesystem_p,
                       OnDiskCacheConfig cache_directory_p);
   std::string GetName() const override;
+
+  unique_ptr<FileHandle>
+  OpenFile(const string &path, FileOpenFlags flags,
+           optional_ptr<FileOpener> opener = nullptr) override;
 
 protected:
   // Read from [handle] for an block-size aligned chunk into [start_addr]; cache

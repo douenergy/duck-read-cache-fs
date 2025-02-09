@@ -100,8 +100,7 @@ void CacheLocal(const CacheReadChunk &chunk, FileSystem &local_filesystem,
   // check and write operation (RMW operation), but it's acceptable since min
   // available disk space reservation is an order of magnitude bigger than cache
   // chunk size.
-  auto disk_space =
-      local_filesystem.GetAvailableDiskSpace(ON_DISK_CACHE_DIRECTORY);
+  auto disk_space = local_filesystem.GetAvailableDiskSpace(cache_directory);
   if (!disk_space.IsValid() ||
       disk_space.GetIndex() < MIN_DISK_SPACE_FOR_CACHE) {
     EvictStaleCacheFiles(local_filesystem, cache_directory);
@@ -146,6 +145,19 @@ std::string DiskCacheFileSystem::GetName() const {
                             internal_filesystem->GetName());
 }
 
+unique_ptr<FileHandle>
+DiskCacheFileSystem::OpenFile(const string &path, FileOpenFlags flags,
+                              optional_ptr<FileOpener> opener) {
+  Value val;
+  if (opener) {
+    FileOpener::TryGetCurrentSetting(opener, "cached_http_cache_directory",
+                                     val);
+    cache_config.on_disk_cache_directory = val.ToString();
+    local_filesystem->CreateDirectory(cache_config.on_disk_cache_directory);
+  }
+
+  return CacheFileSystem::OpenFile(path, flags, opener);
+}
 void DiskCacheFileSystem::ReadAndCache(FileHandle &handle, char *buffer,
                                        idx_t requested_start_offset,
                                        idx_t requested_bytes_to_read,
