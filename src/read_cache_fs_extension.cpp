@@ -68,8 +68,10 @@ static void LoadInternal(DatabaseInstance &instance) {
   }
 
   auto &config = DBConfig::GetConfig(instance);
-  config.AddExtensionOption("fs_cache_disk_dir", "the diskcache dir",
-                            LogicalType::VARCHAR, "asdfasdf");
+  config.AddExtensionOption(
+      "cached_http_cache",
+      "The diskcache directory temporarily stores cached data ",
+      LogicalType::VARCHAR, "/tmp/duckdb_cached_http_cache");
 
   // Register on-disk cache cleanup function.
   ScalarFunction clear_cache_function(

@@ -29,7 +29,7 @@ public:
               cache_config.on_disk_cache_directory)) {
         local_filesystem->CreateDirectory(cache_config.on_disk_cache_directory);
       }
-      FileOpener::TryGetCurrentSetting(opener, "fs_cache_disk_dir", val);
+      FileOpener::TryGetCurrentSetting(opener, "cached_http_cache", val);
       cache_config.on_disk_cache_directory = val.ToString();
     }
 
