@@ -22,7 +22,7 @@ public:
                                 InMemoryCacheConfig{}) {}
   InMemoryCacheFileSystem(unique_ptr<FileSystem> internal_filesystem_p,
                           InMemoryCacheConfig cache_config);
-  std::string GetName() const override { return "in_mem_cache_filesystem"; }
+  std::string GetName() const override;
 
 protected:
   // Read from [handle] for an block-size aligned chunk into [start_addr]; cache

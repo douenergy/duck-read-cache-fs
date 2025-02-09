@@ -18,7 +18,7 @@ public:
                             OnDiskCacheConfig{}) {}
   DiskCacheFileSystem(unique_ptr<FileSystem> internal_filesystem_p,
                       OnDiskCacheConfig cache_directory_p);
-  std::string GetName() const override { return "disk_cache_filesystem"; }
+  std::string GetName() const override;
 
   unique_ptr<FileHandle>
   OpenFile(const string &path, FileOpenFlags flags,

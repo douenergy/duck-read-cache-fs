@@ -49,6 +49,11 @@ InMemoryCacheFileSystem::InMemoryCacheFileSystem(
       cache_config(std::move(cache_config_p)), cache(cache_config.block_count) {
 }
 
+std::string InMemoryCacheFileSystem::GetName() const {
+  return StringUtil::Format("in_mem_cache_filesystem for %s",
+                            internal_filesystem->GetName());
+}
+
 void InMemoryCacheFileSystem::ReadAndCache(FileHandle &handle, char *buffer,
                                            idx_t requested_start_offset,
                                            idx_t requested_bytes_to_read,
