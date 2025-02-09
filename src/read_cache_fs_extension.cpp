@@ -68,7 +68,8 @@ static void LoadInternal(DatabaseInstance &instance) {
   }
 
   auto &config = DBConfig::GetConfig(instance);
-  config.AddExtensionOption("fs_cache_disk_dir", "the diskcache dir", LogicalType::VARCHAR, "asdfasdf");
+  config.AddExtensionOption("fs_cache_disk_dir", "the diskcache dir",
+                            LogicalType::VARCHAR, "asdfasdf");
 
   // Register on-disk cache cleanup function.
   ScalarFunction clear_cache_function(
