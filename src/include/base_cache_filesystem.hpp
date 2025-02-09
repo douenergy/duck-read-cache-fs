@@ -144,9 +144,7 @@ public:
   vector<string> ListSubSystems() override {
     return internal_filesystem->ListSubSystems();
   }
-  bool CanHandleFile(const string &fpath) override {
-    return internal_filesystem->CanHandleFile(fpath);
-  }
+  bool CanHandleFile(const string &fpath) override;
   void Seek(FileHandle &handle, idx_t location) override {
     auto &disk_cache_handle = handle.Cast<CacheFileSystemHandle>();
     internal_filesystem->Seek(*disk_cache_handle.internal_file_handle,
@@ -161,11 +159,7 @@ public:
     return internal_filesystem->SeekPosition(
         *disk_cache_handle.internal_file_handle);
   }
-  // Mutual set acts partially as priority system, which means if multiple
-  // filesystem instance could handle a certain path, if mutual set true,
-  // first-fit fs instance will be selected. Set cached filesystem always
-  // mutually set, so it has higher priority than non-cached version.
-  bool IsManuallySet() override { return true; }
+  bool IsManuallySet() override;
   bool CanSeek() override { return internal_filesystem->CanSeek(); }
   bool OnDiskFile(FileHandle &handle) override {
     auto &disk_cache_handle = handle.Cast<CacheFileSystemHandle>();
@@ -180,9 +174,8 @@ protected:
   // Read from [handle] for an block-size aligned chunk into [start_addr]; cache
   // to local filesystem and return to user.
   virtual void ReadAndCache(FileHandle &handle, char *buffer,
-                            uint64_t requested_start_offset,
-                            uint64_t requested_bytes_to_read,
-                            uint64_t file_size) = 0;
+                            idx_t requested_start_offset,
+                            idx_t requested_bytes_to_read, idx_t file_size) = 0;
 
   // Read from [location] on [nr_bytes] for the given [handle] into [buffer].
   // Return the actual number of bytes to read.

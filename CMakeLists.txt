@@ -20,6 +20,7 @@ set(EXTENSION_SOURCES
     src/disk_cache_filesystem.cpp
     src/in_memory_cache_filesystem.cpp
     src/utils/filesystem_utils.cpp
+    src/utils/thread_utils.cpp
     duckdb-httpfs/extension/httpfs/create_secret_functions.cpp
     duckdb-httpfs/extension/httpfs/crypto.cpp
     duckdb-httpfs/extension/httpfs/hffs.cpp
@@ -59,6 +60,11 @@ target_link_libraries(test_shared_lru_cache ${EXTENSION_NAME})
 
 add_executable(test_size_literals unit/test_size_literals.cpp)
 target_link_libraries(test_size_literals ${EXTENSION_NAME})
+
+add_executable(test_set_extension_config unit/test_set_extension_config.cpp)
+target_link_libraries(test_set_extension_config ${EXTENSION_NAME})
+add_executable(test_base_cache_filesystem unit/test_base_cache_filesystem)
+target_link_libraries(test_base_cache_filesystem ${EXTENSION_NAME})
 
 # Benchmark
 add_executable(read_s3_object benchmark/read_s3_object.cpp)
