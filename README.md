@@ -17,17 +17,7 @@ Key features:
 - Compatibility with duckdb `httpfs`
   + Extension is built upon `httpfs` extension and load it beforehand, so it's fully compatible with it; we provide option `SET cached_http_type='noop';` to fallback to no cache and parallel IO version, which fallbacks to and behaves exactly as httpfs.
 
-## Build
-```sh
-CMAKE_BUILD_PARALLEL_LEVEL=$(nproc) make <debug>
-```
-
-The extension is statically linked into the binary, to execute duckdb with extension enabled you could
-```sh
-./build/<debug>/duckdb
-```
-
-Example usage
+## Example usage
 ```sql
 -- No need to load httpfs.
 D LOAD read_cache_fs;
@@ -51,13 +41,8 @@ D SELECT * FROM 's3://s3-bucket-user-2skzy8zuigonczyfiofztl0zbug--use1-az6--x-s3
 │     2 │     3 │
 │     3 │     4 │
 │     4 │     5 │
-│     5 │     6 │
-│     6 │     7 │
-│     7 │     8 │
-│     8 │     9 │
-│     9 │    10 │
 ├───────┴───────┤
-│    10 rows    │
+│    5 rows     │
 └───────────────┘
 -- Check cache status.
 D SELECT cache_httpfs_get_cache_size();
