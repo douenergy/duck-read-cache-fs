@@ -65,5 +65,8 @@ SELECT * FROM duckdb_settings() WHERE name LIKE 'cached_http%';
 SELECT * FROM duckdb_functions() WHERE function_name LIKE 'cache_httpfs%';
 ```
 
-## Design doc
-[doc](https://docs.google.com/document/d/1IU8NQ_1_u6g178DReO0LCKYdlAHfa1QRU25eRXhf4jI/edit?usp=sharing)
+## [More About Benchmark](/benchmark/README.md)
+
+![sequential-read.cpp](benchmark-graph/seq-performance-barchart.svg)
+
+![random-read.cpp](benchmark-graph/random-performance-barchart.svg)
