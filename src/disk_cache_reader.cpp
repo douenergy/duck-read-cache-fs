@@ -14,8 +14,6 @@
 #include <utility>
 #include <utime.h>
 
-#include <iostream>
-
 namespace duckdb {
 
 namespace {
