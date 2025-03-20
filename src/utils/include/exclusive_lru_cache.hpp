@@ -169,9 +169,11 @@ private:
 	using EntryMap = std::unordered_map<KeyConstRef, Entry, RefHash<KeyHash>, RefEq<KeyEqual>>;
 
 	// Delete key-value pairs indicated by the given entry map iterator [iter] from cache.
-	void DeleteImpl(typename EntryMap::iterator iter) {
+	unique_ptr<Val> DeleteImpl(typename EntryMap::iterator iter) {
+		auto value = std::move(iter->second.value);
 		lru_list.erase(iter->second.lru_iterator);
 		entry_map.erase(iter);
+		return value;
 	}
 
 	// The maximum number of entries in the cache. A value of 0 means there is no limit on entry count.
