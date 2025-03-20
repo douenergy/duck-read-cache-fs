@@ -51,7 +51,12 @@ public:
 	~ExclusiveLruCache() = default;
 
 	// Insert `value` with key `key`. This will replace any previous entry with the same key.
-	void Put(Key key, unique_ptr<Val> value) {
+	// Return evicted value if any.
+	//
+	// Reasoning for returning the value back to caller:
+	// 1. Caller is able to do processing for the value.
+	// 2. For thread-safe lru cache, processing could be moved out of critical section.
+	unique_ptr<Val> Put(Key key, unique_ptr<Val> value) {
 		lru_list.emplace_front(key);
 		Entry new_entry {
 		    .value = std::move(value),
@@ -61,11 +66,18 @@ public:
 		auto key_cref = std::cref(lru_list.front());
 		entry_map[key_cref] = std::move(new_entry);
 
+		unique_ptr<Val> evicted_val = nullptr;
 		if (max_entries > 0 && lru_list.size() > max_entries) {
 			const auto &stale_key = lru_list.back();
-			entry_map.erase(stale_key);
+			auto iter = entry_map.find(stale_key);
+			D_ASSERT(iter != entry_map.end());
+			evicted_val = std::move(iter->second.value);
+
+			entry_map.erase(iter);
 			lru_list.pop_back();
 		}
+
+		return evicted_val;
 	}
 
 	// Delete the entry with key `key`. Return true if the entry was found for `key`, false if the entry was not found.
@@ -120,6 +132,18 @@ public:
 		for (const auto &key : keys_to_delete) {
 			Delete(key);
 		}
+	}
+
+	// Clear the cache and get all values, application could perform their processing logic upon these values.
+	vector<unique_ptr<Val>> ClearAndGetValues() {
+		vector<unique_ptr<Val>> values;
+		values.reserve(entry_map.size());
+		for (auto &[_, cur_entry] : entry_map) {
+			values.emplace_back(std::move(cur_entry.value));
+		}
+		entry_map.clear();
+		lru_list.clear();
+		return values;
 	}
 
 	// Accessors for cache parameters.
@@ -190,9 +214,9 @@ public:
 	~ThreadSafeExclusiveLruCache() = default;
 
 	// Insert `value` with key `key`. This will replace any previous entry with the same key.
-	void Put(Key key, unique_ptr<Val> value) {
+	unique_ptr<Val> Put(Key key, unique_ptr<Val> value) {
 		std::lock_guard<std::mutex> lock(mu);
-		internal_cache.Put(std::move(key), std::move(value));
+		return internal_cache.Put(std::move(key), std::move(value));
 	}
 
 	// Delete the entry with key `key`. Return true if the entry was found for `key`, false if the entry was not found.
@@ -207,6 +231,12 @@ public:
 	unique_ptr<Val> GetAndPop(const Key &key) {
 		std::unique_lock<std::mutex> lock(mu);
 		return internal_cache.GetAndPop(key);
+	}
+
+	// Clear the cache and get all values, application could perform their processing logic upon these values.
+	vector<unique_ptr<Val>> ClearAndGetValues() {
+		std::unique_lock<std::mutex> lock(mu);
+		return internal_cache.ClearAndGetValues();
 	}
 
 	// Clear the cache.
