@@ -129,6 +129,44 @@ TEST_CASE("Test on disk cache filesystem with requested chunk the first and last
 	}
 }
 
+TEST_CASE("Test on disk cache filesystem with request for the last part of the file",
+          "[on-disk cache filesystem test]") {
+	constexpr uint64_t test_block_size = 5;
+	*g_on_disk_cache_directory = TEST_ON_DISK_CACHE_DIRECTORY;
+	g_cache_block_size = test_block_size;
+	SCOPE_EXIT {
+		ResetGlobalConfig();
+	};
+
+	LocalFileSystem::CreateLocal()->RemoveDirectory(TEST_ON_DISK_CACHE_DIRECTORY);
+	auto disk_cache_fs = make_uniq<CacheFileSystem>(LocalFileSystem::CreateLocal());
+
+	// First uncached read
+	{
+		auto handle = disk_cache_fs->OpenFile(TEST_FILENAME, FileOpenFlags::FILE_FLAGS_READ);
+		const uint64_t start_offset = 25;
+		const uint64_t bytes_to_read = 1;
+		string content(bytes_to_read, '\0');
+		disk_cache_fs->Read(*handle, const_cast<void *>(static_cast<const void *>(content.data())), bytes_to_read,
+		                    start_offset);
+
+		REQUIRE(content == TEST_FILE_CONTENT.substr(start_offset, bytes_to_read));
+	}
+	REQUIRE(GetFileCountUnder(TEST_ON_DISK_CACHE_DIRECTORY) == 1);
+
+	// Second cached read.
+	{
+		auto handle = disk_cache_fs->OpenFile(TEST_FILENAME, FileOpenFlags::FILE_FLAGS_READ);
+		const uint64_t start_offset = 25;
+		const uint64_t bytes_to_read = 1;
+		string content(bytes_to_read, '\0');
+		disk_cache_fs->Read(*handle, const_cast<void *>(static_cast<const void *>(content.data())), bytes_to_read,
+		                    start_offset);
+		REQUIRE(content == TEST_FILE_CONTENT.substr(start_offset, bytes_to_read));
+	}
+	REQUIRE(GetFileCountUnder(TEST_ON_DISK_CACHE_DIRECTORY) == 1);
+}
+
 // Three blocks involved, which include first, last and middle chunk.
 TEST_CASE("Test on disk cache filesystem with requested chunk the first, middle and last chunk",
           "[on-disk cache filesystem test]") {
